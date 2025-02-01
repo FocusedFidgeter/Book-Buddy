@@ -1,29 +1,33 @@
-# Reflexity - AI Chat Interface
+# Book Buddy
 
-A modern chat interface built with Reflex that allows you to interact with various AI models through different providers or run completely locally using open-source models.
+Have you ever tried to discuss a book with another person and accidentally spoiled a part for them, or vice versa? Book Buddy is here to save the day!
 
-![Chat Interface](./assets/Chat_Image.jpeg)
+## Backstory
 
-![Response Interface](./assets/Response_Image.jpeg)
+While trying to discuss "Wind and Truth" with my sister, I was telegraphing plot points that had not been as fully developed as my "future knowledge" remembered. When I made a few too many close calls I decided I should shut up and wait until she was fully caught up to me in the story.
 
-## Features
+I had done my best to recreate my knowledge of the chapter she was on, but my attempts were left lacking. Because I had read ahead, my perception of past events were colored. That's when I decided to create Book Buddy.
 
-- Clean and intuitive chat interface
-- Support for multiple LLM providers (easily extensible)
-- Chat History powered by Sqlite
+## Overview
+
+"Book Buddy" is an innovative chatbot designed to offer readers a unique, spoiler-free book discussion experience. It accomplishes this by utilizing a knowledge graph to map book content in a structured way, allowing the chatbot to only discuss plot points the user has already read. This makes it perfect for readers who are keen to explore book analyses, themes, and details without the risk of encountering unwanted spoilers. Book Buddy is developed with a keen eye on creating a delightful user experience for both casual book lovers and an educational audience of students and teachers.
+
+
+The primary objectives of Book Buddy are to foster engaging book discussions and deepen literary appreciation without revealing future story developments. By integrating with a robust technology stack, the project aims to ensure seamless, personalized user interactions across multiple books while maintaining data privacy and security. Success will be measured by user engagement, satisfaction, and the app’s ability to scale efficiently for broader use.
 
 ## Prerequisites
 
 - python 3.8+
 - reflex
 - openai
+- supabase
 
 ## Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/bm611/chat-ui.git
-cd chat-ui
+git clone https://github.com/FocusedFidgeter/Book-Buddy.git
+cd Book-Buddy
 ```
 
 2. Set up Python environment with virtualenv:
@@ -135,3 +139,14 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Acknowledgments
 
 - Built with [Reflex](https://reflex.dev/)
+
+---
+
+**Shout out to the foundation of Book Buddy:**
+
+[Reflexity - AI Chat Interface](https://github.com/bm611/chat-ui)
+
+A modern chat interface built with Reflex that allows you to interact with various AI models through different providers or run completely locally using open-source models.
+
+![Chat Interface](./assets/Reflexity_-_Chatbot_UI.png)
+
