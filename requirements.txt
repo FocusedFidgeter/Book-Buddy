@@ -1,2 +1,4 @@
 reflex==0.6.4
 openai==1.38.0
+pytest==7.4.3
+pytest-mock==3.12.0
