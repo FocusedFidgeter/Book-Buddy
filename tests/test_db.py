@@ -1,94 +1,171 @@
 import pytest
-from postgrest import AsyncPostgrestClient
-import os
-from dotenv import load_dotenv
-import asyncio
+from sqlmodel import Session, SQLModel, create_engine, select
+from datetime import datetime, UTC
+from app.db.models import User, Book, ReadingProgress, KnowledgeNode, KnowledgeRelationship, ChatMessage
 
-# Load environment variables
-load_dotenv()
 
 @pytest.fixture
-async def db_client() -> AsyncPostgrestClient:
-    """Create a PostgREST client for testing."""
-    url = os.getenv("POSTGREST_URL")
-    if not url:
-        pytest.skip("PostgREST URL not found in environment")
-    return AsyncPostgrestClient(url)
+def db_session():
+    """Create a new database session for testing."""
+    engine = create_engine("sqlite:///:memory:")
+    SQLModel.metadata.create_all(engine)
+    with Session(engine) as session:
+        yield session
 
-@pytest.mark.asyncio
-async def test_db_connection(db_client):
+def test_db_connection(db_session):
     """Test that we can connect to the database."""
     try:
         # Simple query to verify connection
-        response = await db_client.from_("users").select("*").limit(1).execute()
-        assert isinstance(response.data, list)
+        result = db_session.exec(select(User)).first()
+        assert isinstance(result, User) or result is None
     except Exception as e:
         pytest.fail(f"Failed to connect to database: {str(e)}")
 
-@pytest.mark.asyncio
-async def test_user_operations(db_client):
+def test_user_operations(db_session):
     """Test basic user operations."""
-    test_user = {
-        'email': 'test@example.com',
-        'reading_preferences': {'favorite_genre': 'fiction'}
-    }
+    test_user = User(
+        email='test@example.com',
+        hashed_password='hashed_test_password',
+        name='Test User'
+    )
     
     try:
         # Create test user
-        response = await db_client.from_("users").insert(test_user).execute()
-        assert response.data, "Failed to insert test user"
-        
-        # Get the inserted user's ID
-        user_id = response.data[0]['id']
+        db_session.add(test_user)
+        db_session.commit()
+        db_session.refresh(test_user)
+        assert test_user.id is not None, "Failed to insert test user"
         
         # Read user data
-        response = await db_client.from_("users").select("*").eq('id', user_id).execute()
-        assert response.data[0]['email'] == test_user['email']
+        queried_user = db_session.exec(select(User).where(User.id == test_user.id)).first()
+        assert queried_user.email == test_user.email
+        assert queried_user.name == test_user.name
         
         # Update user data
-        updated_prefs = {'favorite_genre': 'mystery'}
-        response = await db_client.from_("users")\
-            .update({'reading_preferences': updated_prefs})\
-            .eq('id', user_id)\
-            .execute()
-        assert response.data[0]['reading_preferences'] == updated_prefs
+        queried_user.name = 'Updated Test User'
+        db_session.commit()
+        db_session.refresh(queried_user)
+        assert queried_user.name == 'Updated Test User'
         
         # Delete test user
-        response = await db_client.from_("users").delete().eq('id', user_id).execute()
-        assert response.data, "Failed to delete test user"
+        db_session.delete(queried_user)
+        db_session.commit()
+        deleted_user = db_session.exec(select(User).where(User.id == test_user.id)).first()
+        assert deleted_user is None, "Failed to delete test user"
         
     except Exception as e:
         pytest.fail(f"User operations test failed: {str(e)}")
 
-@pytest.mark.asyncio
-async def test_book_progress_tracking(db_client):
+def test_book_progress_tracking(db_session):
     """Test book progress tracking operations."""
-    test_progress = {
-        'user_id': 'test-user-id',
-        'book_id': 'test-book-id',
-        'current_chapter': 1,
-        'last_page_read': 25,
-        'completion_percentage': 10.5
-    }
+    # Create test user and book first
+    test_user = User(
+        email='test@example.com',
+        hashed_password='hashed_test_password',
+        name='Test User'
+    )
+    test_book = Book(
+        title='Test Book',
+        author='Test Author',
+        total_chapters=10,
+        description='Test Description'
+    )
     
     try:
-        # Insert progress
-        response = await db_client.from_("reading_progress").insert(test_progress).execute()
-        assert response.data, "Failed to insert reading progress"
+        # Add user and book
+        db_session.add(test_user)
+        db_session.add(test_book)
+        db_session.commit()
+        db_session.refresh(test_user)
+        db_session.refresh(test_book)
         
-        progress_id = response.data[0]['id']
+        # Create reading progress
+        test_progress = ReadingProgress(
+            user_id=test_user.id,
+            book_id=test_book.id,
+            current_chapter=1
+        )
+        
+        # Insert progress
+        db_session.add(test_progress)
+        db_session.commit()
+        db_session.refresh(test_progress)
+        assert test_progress.id is not None, "Failed to insert reading progress"
         
         # Update progress
-        updated_progress = {'current_chapter': 2, 'last_page_read': 50, 'completion_percentage': 21.0}
-        response = await db_client.from_("reading_progress")\
-            .update(updated_progress)\
-            .eq('id', progress_id)\
-            .execute()
-        assert response.data[0]['current_chapter'] == updated_progress['current_chapter']
+        test_progress.current_chapter = 2
+        db_session.commit()
+        db_session.refresh(test_progress)
+        assert test_progress.current_chapter == 2
         
         # Clean up
-        response = await db_client.from_("reading_progress").delete().eq('id', progress_id).execute()
-        assert response.data, "Failed to delete test progress"
+        db_session.delete(test_progress)
+        db_session.delete(test_book)
+        db_session.delete(test_user)
+        db_session.commit()
         
     except Exception as e:
         pytest.fail(f"Book progress tracking test failed: {str(e)}")
+
+def test_knowledge_node_operations(db_session):
+    """Test knowledge node and relationship operations."""
+    # Create test book first
+    test_book = Book(
+        title='Test Book',
+        author='Test Author',
+        total_chapters=10,
+        description='Test Description'
+    )
+    
+    try:
+        # Add book
+        db_session.add(test_book)
+        db_session.commit()
+        db_session.refresh(test_book)
+        
+        # Create knowledge nodes
+        node1 = KnowledgeNode(
+            book_id=test_book.id,
+            chapter=1,
+            content='Test knowledge 1',
+            context='Test context 1'
+        )
+        node2 = KnowledgeNode(
+            book_id=test_book.id,
+            chapter=2,
+            content='Test knowledge 2',
+            context='Test context 2'
+        )
+        
+        # Add nodes
+        db_session.add(node1)
+        db_session.add(node2)
+        db_session.commit()
+        db_session.refresh(node1)
+        db_session.refresh(node2)
+        
+        # Create relationship
+        relationship = KnowledgeRelationship(
+            source_node_id=node1.id,
+            target_node_id=node2.id,
+            relationship_type='references'
+        )
+        
+        # Add relationship
+        db_session.add(relationship)
+        db_session.commit()
+        db_session.refresh(relationship)
+        
+        # Verify relationship
+        assert relationship.source_node.content == 'Test knowledge 1'
+        assert relationship.target_node.content == 'Test knowledge 2'
+        
+        # Clean up
+        db_session.delete(relationship)
+        db_session.delete(node1)
+        db_session.delete(node2)
+        db_session.delete(test_book)
+        db_session.commit()
+        
+    except Exception as e:
+        pytest.fail(f"Knowledge node operations test failed: {str(e)}")

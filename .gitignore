@@ -5,3 +5,12 @@
 .web
 __pycache__/
 assets/external/
+*.log
+*.env
+*.ini
+*.windsurfrules
+*.global_rules
+*.egg-info/
+migrations/
+chat_history.db
+alembic.ini
