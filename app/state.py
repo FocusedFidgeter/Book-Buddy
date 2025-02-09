@@ -1,6 +1,7 @@
 import reflex as rx
 from app.api import api
 from app.db.database import Database
+from app.db.base import Base
 from typing import List, Tuple, Optional
 
 
