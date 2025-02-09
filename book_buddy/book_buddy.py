@@ -2,9 +2,9 @@ import reflex as rx
 from .components import hero
 from .components import nav
 from .components import chat
-from app.state import State
+from book_buddy.state import State
 from typing import List, Tuple
-from app.db.database import Database
+from book_buddy.db.database import Database
 
 # Initialize database singleton
 Database.get_instance()

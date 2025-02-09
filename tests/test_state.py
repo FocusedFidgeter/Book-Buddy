@@ -1,5 +1,9 @@
+import os
+import sys
 import pytest
-from app.state import State
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from book_buddy.state import State
 from unittest.mock import MagicMock
 
 def test_state_initialization():

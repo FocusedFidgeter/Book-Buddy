@@ -1,7 +1,7 @@
 import pytest
 from sqlmodel import Session, SQLModel, create_engine, select
 from datetime import datetime, UTC
-from app.db.models import User, Book, ReadingProgress, KnowledgeNode, KnowledgeRelationship, ChatMessage
+from book_buddy.db.models import User, Book, ReadingProgress, KnowledgeNode, KnowledgeRelationship, ChatMessage
 
 
 @pytest.fixture

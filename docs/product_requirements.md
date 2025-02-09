@@ -37,7 +37,7 @@ As users engage with Book Buddy, they have the option to personalize their exper
 - **Personal Reading Progress**: Tracks individual progress and preferences to tailor discussions and analyses.
 - **AI-Powered Conversations**: Uses GPT-4o or Claude 3.5 Sonnet to generate interactive and informative responses.
 - **Dashboard & Book Management**: Central hub for book selection and viewing reading progress.
-- **Settings & Personalization**: Users can adjust reading history, preferences, and modify how they interact with the app.
+- **Settings & Personalization**: Users can adjust reading history, preferences, and modify how they interact with the book_buddy.
 - **Data Privacy & Security**: Comprehensive measures to protect user data through Supabase, with options for data deletion.
 - **Export Functionality**: Chat and knowledge base can be exported into markdown files on GitHub for external use.
 

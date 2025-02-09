@@ -1,5 +1,5 @@
 import reflex as rx
-from app.state import State
+from book_buddy.state import State
 from typing import List, Tuple
 from .sidebar import sidebar
 
